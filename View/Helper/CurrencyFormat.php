@@ -11,6 +11,7 @@ namespace Zend\I18n\View\Helper;
 
 use Locale;
 use NumberFormatter;
+use Zend\I18n\Exception;
 use Zend\View\Helper\AbstractHelper;
 
 /**
@@ -19,25 +20,18 @@ use Zend\View\Helper\AbstractHelper;
 class CurrencyFormat extends AbstractHelper
 {
     /**
-     * The 3-letter ISO 4217 currency code indicating the currency to use
-     *
-     * @var string
-     */
-    protected $currencyCode;
-
-    /**
-     * Formatter instances
-     *
-     * @var array
-     */
-    protected $formatters = array();
-
-    /**
-     * Locale to use instead of the default
+     * Locale to use instead of the default.
      *
      * @var string
      */
     protected $locale;
+
+    /**
+     * The 3-letter ISO 4217 currency code indicating the currency to use.
+     *
+     * @var string
+     */
+    protected $currencyCode;
 
     /**
      * If set to true, the currency will be returned with two decimals
@@ -47,7 +41,97 @@ class CurrencyFormat extends AbstractHelper
     protected $showDecimals = true;
 
     /**
-     * Format a number
+     * Formatter instances.
+     *
+     * @var array
+     */
+    protected $formatters = array();
+
+    /**
+     * @throws Exception\InvalidArgumentException if ext/intl is not present
+     */
+    public function __construct()
+    {
+        if (!extension_loaded('intl')) {
+            throw new Exception\ExtensionNotLoadedException(sprintf(
+                '%s component requires the intl PHP extension',
+                __NAMESPACE__
+            ));
+        }
+    }
+
+    /**
+     * The 3-letter ISO 4217 currency code indicating the currency to use.
+     *
+     * @param  string $currencyCode
+     * @return CurrencyFormat
+     */
+    public function setCurrencyCode($currencyCode)
+    {
+        $this->currencyCode = $currencyCode;
+        return $this;
+    }
+
+    /**
+     * Get the 3-letter ISO 4217 currency code indicating the currency to use.
+     *
+     * @return string
+     */
+    public function getCurrencyCode()
+    {
+        return $this->currencyCode;
+    }
+
+    /**
+     * Set if the view helper should show two decimals
+     *
+     * @param  bool $showDecimals
+     * @return CurrencyFormat
+     */
+    public function setShouldShowDecimals($showDecimals)
+    {
+        $this->showDecimals = (bool) $showDecimals;
+        return $this;
+    }
+
+    /**
+     * Get if the view helper should show two decimals
+     *
+     * @return bool
+     */
+    public function shouldShowDecimals()
+    {
+        return $this->showDecimals;
+    }
+
+    /**
+     * Set locale to use instead of the default.
+     *
+     * @param  string $locale
+     * @return CurrencyFormat
+     */
+    public function setLocale($locale)
+    {
+        $this->locale = (string) $locale;
+        return $this;
+    }
+
+    /**
+     * Get the locale to use.
+     *
+     * @return string|null
+     */
+    public function getLocale()
+    {
+        if ($this->locale === null) {
+            $this->locale = Locale::getDefault();
+        }
+
+        return $this->locale;
+    }
+
+    /**
+     * Format a number.
      *
      * @param  float  $number
      * @param  string $currencyCode
@@ -89,75 +173,5 @@ class CurrencyFormat extends AbstractHelper
         return $this->formatters[$formatterId]->formatCurrency(
             $number, $currencyCode
         );
-    }
-
-    /**
-     * The 3-letter ISO 4217 currency code indicating the currency to use
-     *
-     * @param  string $currencyCode
-     * @return CurrencyFormat
-     */
-    public function setCurrencyCode($currencyCode)
-    {
-        $this->currencyCode = $currencyCode;
-        return $this;
-    }
-
-    /**
-     * Get the 3-letter ISO 4217 currency code indicating the currency to use
-     *
-     * @return string
-     */
-    public function getCurrencyCode()
-    {
-        return $this->currencyCode;
-    }
-
-    /**
-     * Set locale to use instead of the default
-     *
-     * @param  string $locale
-     * @return CurrencyFormat
-     */
-    public function setLocale($locale)
-    {
-        $this->locale = (string) $locale;
-        return $this;
-    }
-
-    /**
-     * Get the locale to use
-     *
-     * @return string|null
-     */
-    public function getLocale()
-    {
-        if ($this->locale === null) {
-            $this->locale = Locale::getDefault();
-        }
-
-        return $this->locale;
-    }
-
-    /**
-     * Set if the view helper should show two decimals
-     *
-     * @param  bool $showDecimals
-     * @return CurrencyFormat
-     */
-    public function setShouldShowDecimals($showDecimals)
-    {
-        $this->showDecimals = (bool) $showDecimals;
-        return $this;
-    }
-
-    /**
-     * Get if the view helper should show two decimals
-     *
-     * @return bool
-     */
-    public function shouldShowDecimals()
-    {
-        return $this->showDecimals;
     }
 }

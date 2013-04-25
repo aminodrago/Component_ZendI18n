@@ -17,15 +17,15 @@ use Zend\I18n\Exception;
 class TranslatePlural extends AbstractTranslatorHelper
 {
     /**
-     * Translate a plural message
+     * Translate a plural message.
      *
      * @param  string  $singular
      * @param  string  $plural
      * @param  integer $number
      * @param  string  $textDomain
      * @param  string  $locale
-     * @throws Exception\RuntimeException
      * @return string
+     * @throws Exception\RuntimeException
      */
     public function __invoke(
         $singular,
@@ -42,7 +42,6 @@ class TranslatePlural extends AbstractTranslatorHelper
         if (null === $textDomain) {
             $textDomain = $this->getTranslatorTextDomain();
         }
-
         return $translator->translatePlural($singular, $plural, $number, $textDomain, $locale);
     }
 }

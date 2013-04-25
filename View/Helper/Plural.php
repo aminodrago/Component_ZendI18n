@@ -28,36 +28,23 @@ use Zend\View\Helper\AbstractHelper;
 class Plural extends AbstractHelper
 {
     /**
-     * Plural rule to use
+     * Rule to use
      *
      * @var PluralRule
      */
     protected $rule;
 
     /**
-     * Given an array of strings, a number and, if wanted, an optional locale (the default one is used
-     * otherwise), this picks the right string according to plural rules of the locale
-     *
-     * @param  array|string $strings
-     * @param  int          $number
-     * @throws Exception\InvalidArgumentException
-     * @return string
+     * @throws Exception\InvalidArgumentException if ext/intl is not present
      */
-    public function __invoke($strings, $number)
+    public function __construct()
     {
-        if (null === $this->getPluralRule()) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                'No plural rule was set'
+        if (!extension_loaded('intl')) {
+            throw new Exception\ExtensionNotLoadedException(sprintf(
+                '%s component requires the intl PHP extension',
+                __NAMESPACE__
             ));
         }
-
-        if (!is_array($strings)) {
-            $strings = (array) $strings;
-        }
-
-        $pluralIndex = $this->getPluralRule()->evaluate($number);
-
-        return $strings[$pluralIndex];
     }
 
     /**
@@ -78,12 +65,28 @@ class Plural extends AbstractHelper
     }
 
     /**
-     * Get the plural rule to  use
+     * Given an array of strings, a number and, if wanted, an optional locale (the default one is used
+     * otherwise), this picks the right string according to plural rules of the locale
      *
-     * @return PluralRule
+     * @param  array|string $strings
+     * @param  int          $number
+     * @throws Exception\InvalidArgumentException
+     * @return string
      */
-    public function getPluralRule()
+    public function __invoke($strings, $number)
     {
-        return $this->rule;
+        if ($this->rule === null) {
+            throw new Exception\InvalidArgumentException(sprintf(
+                'No plural rule was set'
+            ));
+        }
+
+        if (!is_array($strings)) {
+            $strings = (array) $strings;
+        }
+
+        $pluralIndex = $this->rule->evaluate($number);
+
+        return $strings[$pluralIndex];
     }
 }
