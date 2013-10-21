@@ -9,6 +9,7 @@
 
 namespace Zend\I18n\Validator;
 
+use Locale;
 use Traversable;
 use Zend\Stdlib\ArrayUtils;
 use Zend\Validator\AbstractValidator;
@@ -86,6 +87,9 @@ class PhoneNumber extends AbstractValidator
 
         if (array_key_exists('country', $options)) {
             $this->setCountry($options['country']);
+        } else {
+            $country = Locale::getRegion(Locale::getDefault());
+            $this->setCountry($country);
         }
 
         if (array_key_exists('allowed_types', $options)) {
@@ -212,18 +216,17 @@ class PhoneNumber extends AbstractValidator
 
         $codeLength = strlen($countryPattern['code']);
 
-        // Check for existence of E.123/E.164 prefix
+        /*
+         * Check for existence of either:
+         *   1) E.123/E.164 international prefix
+         *   2) International double-O prefix
+         *   3) Bare country prefix
+         */
         if (('+' . $countryPattern['code']) == substr($value, 0, $codeLength + 1)) {
             $valueNoCountry = substr($value, $codeLength + 1);
-        }
-
-        // Check for existence of international double-O prefix
-        elseif (('00' . $countryPattern['code']) == substr($value, 0, $codeLength + 2)) {
+        } elseif (('00' . $countryPattern['code']) == substr($value, 0, $codeLength + 2)) {
             $valueNoCountry = substr($value, $codeLength + 2);
-        }
-
-        // Check for existence of bare country prefix
-        elseif ($countryPattern['code'] == substr($value, 0, $codeLength)) {
+        } elseif ($countryPattern['code'] == substr($value, 0, $codeLength)) {
             $valueNoCountry = substr($value, $codeLength);
         }
 
